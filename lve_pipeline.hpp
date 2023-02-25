@@ -7,12 +7,26 @@
 
 namespace lve
 {
-    struct PipelineConfigInfo {};
+    struct PipelineConfigInfo
+    {
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewport_info;
+        VkPipelineInputAssemblyStateCreateInfo input_assembly_info;
+        VkPipelineRasterizationStateCreateInfo rasterization_info;
+        VkPipelineMultisampleStateCreateInfo multisample_info;
+        VkPipelineColorBlendAttachmentState color_blend_attachment;
+        VkPipelineColorBlendStateCreateInfo color_blend_info;
+        VkPipelineDepthStencilStateCreateInfo depth_stencil_info;
+        VkPipelineLayout pipeline_layout = nullptr;
+        VkRenderPass render_pass = nullptr;
+        uint32_t subpass = 0;
+    };
     class LvePipeline
     {
         public:
             LvePipeline(LveDevice& device, const std::string& vertex_shader_filepath, const std::string& frag_shader_filepath, const PipelineConfigInfo& config_info);
-            ~LvePipeline() {}
+            ~LvePipeline();
 
             // deleting copy operator and copy constructor (https://youtu.be/LYKlEIzGmW4?t=549)
             LvePipeline(const LvePipeline&) = delete;
@@ -25,7 +39,7 @@ namespace lve
 
             void createGraphicsPipeline(const std::string& vertex_shader_filepath, const std::string& frag_shader_filepath, const PipelineConfigInfo& config_info);
 
-            void createShaderPipeline(const std::vector<char>& code, VkShaderModule* shader_module);
+            void createShaderModule(const std::vector<char>& code, VkShaderModule* shader_module);
 
             LveDevice& lve_device_;
             VkPipeline graphics_pipeline_;
