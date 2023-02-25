@@ -80,7 +80,7 @@ namespace lve
             // clear values
             std::array<VkClearValue, 2> clear_values{};
             clear_values[0].color = {0.1f, 0.1f, 0.1f, 1.0f};   // RGBA
-            // clear_values[0].depthStencil = ...   https://youtu.be/_VOR6q3edig?t=414
+            // clear_values[0].depthStencil = ...   https://youtu.be/_VOR6q3edig?t=414 (also VkClearValue is a union so requires EITHER color OR depth)
             clear_values[1].depthStencil = {1.0f, 0};  // for depth buffer, farthest away value is 1, closest is 0
 
             // render pass stuff
