@@ -127,6 +127,11 @@ namespace lve
         }
     }
 
+    void LvePipeline::bind(VkCommandBuffer command_buffer)
+    {
+        vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_);
+    }
+
     PipelineConfigInfo LvePipeline::default_pipeline_config_info_(uint32_t width, uint32_t height)
     {
         PipelineConfigInfo info{};
