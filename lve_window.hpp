@@ -14,6 +14,7 @@ namespace lve
             ~LveWindow();
 
             bool shouldClose();
+            VkExtent2D getExtent();
             void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
             // deleting copy operator and copy constructor (https://youtu.be/lr93-_cC8v4?t=601)
