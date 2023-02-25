@@ -14,7 +14,7 @@ namespace lve
             void run();
 
         private:
-            LveWindow lve_window_{WIDTH, HEIGHT, "Hello V!"};
+            LveWindow lve_window_{WIDTH, HEIGHT, "Little Vulkan Engine (lve) project"};
             LvePipeline lve_pipeline{"shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv"};
     };
 }
