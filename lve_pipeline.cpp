@@ -75,6 +75,17 @@ namespace lve
             vertex_input_info.pVertexBindingDescriptions = nullptr;
         }
 
+        VkPipelineViewportStateCreateInfo viewport_info{};
+        {
+            viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+
+            viewport_info.viewportCount = 1;
+            viewport_info.pViewports = &config_info.viewport;
+
+            viewport_info.scissorCount = 1;
+            viewport_info.pScissors = &config_info.scissor;
+        }
+
         VkGraphicsPipelineCreateInfo pipeline_info{};
         {
             pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -82,7 +93,7 @@ namespace lve
             pipeline_info.pStages = shader_stages;
             pipeline_info.pVertexInputState = &vertex_input_info;
             pipeline_info.pInputAssemblyState = &config_info.input_assembly_info;
-            pipeline_info.pViewportState = &config_info.viewport_info;
+            pipeline_info.pViewportState = &viewport_info;
             pipeline_info.pRasterizationState = &config_info.rasterization_info;
             pipeline_info.pMultisampleState = &config_info.multisample_info;
             pipeline_info.pColorBlendState = &config_info.color_blend_info;
@@ -141,17 +152,6 @@ namespace lve
         {
             info.scissor.offset = {0, 0};
             info.scissor.extent = {width, height};
-        }
-
-        // combine viewport and scissor
-        {
-            info.viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-
-            info.viewport_info.viewportCount = 1;
-            info.viewport_info.pViewports = &info.viewport;
-
-            info.viewport_info.scissorCount = 1;
-            info.viewport_info.pScissors = &info.scissor;
         }
 
         // rasterization https://youtu.be/ecMcXW6MSYU?t=278
