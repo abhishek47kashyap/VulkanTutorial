@@ -29,7 +29,7 @@ namespace lve
 
             // deleting copy operator and copy constructor (https://youtu.be/LYKlEIzGmW4?t=549)
             LvePipeline(const LvePipeline&) = delete;
-            void operator=(const LvePipeline&) = delete;
+            LvePipeline& operator=(const LvePipeline&) = delete;
 
             void bind(VkCommandBuffer command_buffer);
 
