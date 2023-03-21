@@ -32,10 +32,12 @@ namespace lve
             void createPipeline();
             void createCommandBuffers();
             void drawFrame();
+            void recreateSwapChain();
+            void recordCommandBuffer(const int image_index);
 
             LveWindow lve_window_{WIDTH, HEIGHT, "Little Vulkan Engine (lve) project"};
             LveDevice lve_device_{lve_window_};
-            LveSwapChain lve_swap_chain_{lve_device_, lve_window_.getExtent()};
+            std::unique_ptr<LveSwapChain> lve_swap_chain_;
             std::unique_ptr<LvePipeline> lve_pipeline_;
             VkPipelineLayout pipeline_layout_;
             std::vector<VkCommandBuffer> command_buffers_;
