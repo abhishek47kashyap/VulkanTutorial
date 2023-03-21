@@ -12,8 +12,7 @@ namespace lve
 {
     struct SimplePushConstantData
     {
-        glm::mat2 transform{1.0f};   // default initialized to identity matrix
-        glm::vec2 offset;
+        glm::mat4 transform{1.0f};   // default initialized to identity matrix
         alignas(16) glm::vec3 color;   // alignas(16) needed because of https://youtu.be/wlLGLWI9Fdc?t=498
     };
 
@@ -67,12 +66,12 @@ namespace lve
 
         for (auto& game_obj : game_objects)
         {
-            game_obj.transform_2d_.rotation = glm::mod(game_obj.transform_2d_.rotation + 0.01f, glm::two_pi<float>());
+            game_obj.transform_.rotation.y = glm::mod(game_obj.transform_.rotation.y + 0.01f, glm::two_pi<float>());
+            game_obj.transform_.rotation.x = glm::mod(game_obj.transform_.rotation.x + 0.005f, glm::two_pi<float>());
 
             SimplePushConstantData push
             {
-                .transform = game_obj.transform_2d_.mat2(),
-                .offset = game_obj.transform_2d_.translation,
+                .transform = game_obj.transform_.mat4(),
                 .color = game_obj.color_
             };
 
