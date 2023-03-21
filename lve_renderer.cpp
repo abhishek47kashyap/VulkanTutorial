@@ -5,7 +5,7 @@
 
 namespace lve
 {
-    LveRenderer::LveRenderer(LveWindow& window, LveDevice& device): lve_window_(window), lve_device_(device), is_frame_started_(false)
+    LveRenderer::LveRenderer(LveWindow& window, LveDevice& device): lve_window_(window), lve_device_(device), is_frame_started_(false), current_frame_index_(0)
     {
         recreateSwapChain();
         createCommandBuffers();
@@ -34,19 +34,19 @@ namespace lve
         }
         else
         {
-            lve_swap_chain_ = std::make_unique<LveSwapChain>(lve_device_, extent, std::move(lve_swap_chain_));
-            if (lve_swap_chain_->imageCount() != command_buffers_.size())
+            std::shared_ptr<LveSwapChain> old_swap_chain = std::move(lve_swap_chain_);
+            lve_swap_chain_ = std::make_unique<LveSwapChain>(lve_device_, extent, old_swap_chain);
+
+            if (!old_swap_chain->compareSwapFormats(*lve_swap_chain_.get()))
             {
-                freeCommandBuffers();
-                createCommandBuffers();
+                throw std::runtime_error("Swap chain image/depth format has changed");
             }
         }
-
     }
 
     void LveRenderer::createCommandBuffers()
     {
-        command_buffers_.resize(lve_swap_chain_->imageCount());
+        command_buffers_.resize(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo alloc_info{};
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -116,6 +116,7 @@ namespace lve
         }
 
         is_frame_started_ = false;
+        current_frame_index_ = (current_frame_index_ + 1) % LveSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
     void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer command_buffer)
