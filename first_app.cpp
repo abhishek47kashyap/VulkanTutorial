@@ -1,10 +1,20 @@
 #include "first_app.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 #include <stdexcept>
 #include <array>
 
 namespace lve
 {
+    struct SimplePushConstantData
+    {
+        glm::vec2 offset;
+        glm::vec3 color;
+    };
+
     FirstApp::FirstApp()
     {
         loadModels();
@@ -43,12 +53,19 @@ namespace lve
 
     void FirstApp::createPipelineLayout()
     {
+        VkPushConstantRange push_constant_range
+        {
+            .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            .offset = 0,
+            .size = sizeof(SimplePushConstantData)
+        };
+
         VkPipelineLayoutCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         info.setLayoutCount = 0;
         info.pSetLayouts = nullptr;
-        info.pushConstantRangeCount = 0;
-        info.pPushConstantRanges = nullptr;
+        info.pushConstantRangeCount = 1;
+        info.pPushConstantRanges = &push_constant_range;
 
         if (vkCreatePipelineLayout(lve_device_.device(), &info, nullptr, &pipeline_layout_) != VK_SUCCESS)
         {
@@ -160,7 +177,28 @@ namespace lve
 
         lve_pipeline_->bind(command_buffers_[image_index]);
         lve_model_->bind(command_buffers_[image_index]);
-        lve_model_->draw(command_buffers_[image_index]);
+
+        // https://youtu.be/wlLGLWI9Fdc?t=264
+        constexpr int num_copies = 4;
+        for (int j = 0; j < num_copies; j++)
+        {
+            SimplePushConstantData push
+            {
+                .offset = {0.0f, -0.4f + (j * 0.25f)},
+                .color = {0.0f, 0.0f, 0.2f + (j * 0.2f)}
+            };
+
+            vkCmdPushConstants(
+                command_buffers_[image_index],
+                pipeline_layout_,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push
+            );
+
+            lve_model_->draw(command_buffers_[image_index]);
+        }
 
         vkCmdEndRenderPass(command_buffers_[image_index]);
         if (vkEndCommandBuffer(command_buffers_[image_index]) != VK_SUCCESS)
