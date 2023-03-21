@@ -16,9 +16,11 @@ namespace lve
     {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
         window_ = glfwCreateWindow(width_, height_, windowName_.c_str(), nullptr, nullptr);
+        glfwSetWindowUserPointer(window_, this);
+        glfwSetFramebufferSizeCallback(window_, frameBufferResizeCallback);
     }
 
     bool LveWindow::shouldClose()
@@ -37,6 +39,14 @@ namespace lve
         {
             throw std::runtime_error("LveWindow::createWindowSurface(); failed to create window");
         }
+    }
+
+    void LveWindow::frameBufferResizeCallback(GLFWwindow* window, const int width, const int height)
+    {
+        auto lve_window = reinterpret_cast<LveWindow*>(glfwGetWindowUserPointer(window));
+        lve_window->frame_buffer_resized_ = true;
+        lve_window->width_ = width;
+        lve_window->height_ = height;
     }
 
     LveWindow::~LveWindow()

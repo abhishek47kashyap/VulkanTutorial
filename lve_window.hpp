@@ -16,16 +16,20 @@ namespace lve
             bool shouldClose();
             VkExtent2D getExtent();
             void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+            bool wasWindowResized() const { return frame_buffer_resized_; }
+            void resetWindowResizedFlag() { frame_buffer_resized_ = false; }
 
             // deleting copy operator and copy constructor (https://youtu.be/lr93-_cC8v4?t=601)
             LveWindow(const LveWindow&) = delete;
             LveWindow &operator=(const LveWindow&) = delete;
 
         private:
+            static void frameBufferResizeCallback(GLFWwindow* window, const int width, const int height);
             void initWindow();
 
-            const int width_;
-            const int height_;
+            int width_;
+            int height_;
+            bool frame_buffer_resized_ = false;
 
             std::string windowName_;
 
