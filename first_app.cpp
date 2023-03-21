@@ -138,6 +138,10 @@ namespace lve
 
     void FirstApp::recordCommandBuffer(const int image_index)
     {
+        // animation looping every thousandth frame
+        static int frame = 0;
+        frame = (frame + 1) % 1000;
+
         VkCommandBufferBeginInfo cmd_buffer_begin_info{};
         cmd_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         if (vkBeginCommandBuffer(command_buffers_[image_index], &cmd_buffer_begin_info) != VK_SUCCESS)
@@ -147,7 +151,7 @@ namespace lve
 
         // clear values
         std::array<VkClearValue, 2> clear_values{};
-        clear_values[0].color = {0.1f, 0.1f, 0.1f, 1.0f};   // RGBA
+        clear_values[0].color = {0.01f, 0.01f, 0.01f, 1.0f};   // RGBA
         // clear_values[0].depthStencil = ...   https://youtu.be/_VOR6q3edig?t=414 (also VkClearValue is a union so requires EITHER color OR depth)
         clear_values[1].depthStencil = {1.0f, 0};  // for depth buffer, farthest away value is 1, closest is 0
 
@@ -184,7 +188,7 @@ namespace lve
         {
             SimplePushConstantData push
             {
-                .offset = {0.0f, -0.4f + (j * 0.25f)},
+                .offset = {(-0.5f + (frame * 0.002f)), -0.4f + (j * 0.25f)},
                 .color = {0.0f, 0.0f, 0.2f + (j * 0.2f)}
             };
 
