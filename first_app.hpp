@@ -5,6 +5,7 @@
 #include "lve_device.hpp"
 #include "lve_swap_chain.hpp"
 #include "lve_model.hpp"
+#include "lve_game_object.hpp"
 
 #include <memory>
 #include <vector>
@@ -27,7 +28,7 @@ namespace lve
             void run();
 
         private:
-            void loadModels();
+            void loadGameObjects();
             void createPipelineLayout();
             void createPipeline();
             void createCommandBuffers();
@@ -35,6 +36,7 @@ namespace lve
             void drawFrame();
             void recreateSwapChain();
             void recordCommandBuffer(const int image_index);
+            void renderGameObjects(VkCommandBuffer command_buffer);
 
             LveWindow lve_window_{WIDTH, HEIGHT, "Little Vulkan Engine (lve) project"};
             LveDevice lve_device_{lve_window_};
@@ -42,6 +44,6 @@ namespace lve
             std::unique_ptr<LvePipeline> lve_pipeline_;
             VkPipelineLayout pipeline_layout_;
             std::vector<VkCommandBuffer> command_buffers_;
-            std::unique_ptr<LveModel> lve_model_;
+            std::vector<LveGameObject> game_objects_;
     };
 }
