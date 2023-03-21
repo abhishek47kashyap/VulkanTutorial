@@ -58,10 +58,14 @@ namespace lve
 
     void FirstApp::createPipeline()
     {
-        auto config = LvePipeline::default_pipeline_config_info_(lve_swap_chain_->width(), lve_swap_chain_->height());
-        config.render_pass = lve_swap_chain_->getRenderPass();
-        config.pipeline_layout = pipeline_layout_;
-        lve_pipeline_ = std::make_unique<LvePipeline>(lve_device_, "shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv", config);
+        assert(lve_swap_chain_ != nullptr && "Cannot create pipeline before swap chain");
+        assert(pipeline_layout_ != nullptr && "Cannot create pipeline before pipeline layout");
+
+        PipelineConfigInfo pipeline_config_info{};
+        LvePipeline::default_pipeline_config_info_(pipeline_config_info);
+        pipeline_config_info.render_pass = lve_swap_chain_->getRenderPass();
+        pipeline_config_info.pipeline_layout = pipeline_layout_;
+        lve_pipeline_ = std::make_unique<LvePipeline>(lve_device_, "shaders/simple_shader.vert.spv", "shaders/simple_shader.frag.spv", pipeline_config_info);
     }
 
     void FirstApp::recreateSwapChain()
@@ -75,7 +79,21 @@ namespace lve
         }
 
         vkDeviceWaitIdle(lve_device_.device());
-        lve_swap_chain_ = std::make_unique<LveSwapChain>(lve_device_, extent);
+
+        if (lve_swap_chain_ == nullptr)
+        {
+            lve_swap_chain_ = std::make_unique<LveSwapChain>(lve_device_, extent);
+        }
+        else
+        {
+            lve_swap_chain_ = std::make_unique<LveSwapChain>(lve_device_, extent, std::move(lve_swap_chain_));
+            if (lve_swap_chain_->imageCount() != command_buffers_.size())
+            {
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+        }
+
         createPipeline();
     }
 
@@ -93,6 +111,12 @@ namespace lve
         {
             throw std::runtime_error("FirstApp::createCommandBuffers(): could not allocate command buffers");
         }
+    }
+
+    void FirstApp::freeCommandBuffers()
+    {
+        vkFreeCommandBuffers(lve_device_.device(), lve_device_.getCommandPool(), static_cast<uint32_t>(command_buffers_.size()), command_buffers_.data());
+        command_buffers_.clear();
     }
 
     void FirstApp::recordCommandBuffer(const int image_index)
@@ -122,6 +146,17 @@ namespace lve
 
         // record to command buffer to begin render pass https://youtu.be/_VOR6q3edig?t=458
         vkCmdBeginRenderPass(command_buffers_[image_index], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(lve_swap_chain_->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(lve_swap_chain_->getSwapChainExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        VkRect2D scissor{{0, 0}, lve_swap_chain_->getSwapChainExtent()};
+        vkCmdSetViewport(command_buffers_[image_index], 0, 1, &viewport);
+        vkCmdSetScissor(command_buffers_[image_index], 0, 1, &scissor);
 
         lve_pipeline_->bind(command_buffers_[image_index]);
         lve_model_->bind(command_buffers_[image_index]);
